@@ -1,0 +1,23 @@
+# Python virtual environments
+venv/
+image_venv/
+
+# Python cache
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+
+# VS Code
+.vscode/
+
+# Environment / system files
+.env
+.DS_Store
+
+# Large training datasets
+data/soil_images/
+data/soil_health/
+
+# Temporary / processed data
+*.tmp
+*.log

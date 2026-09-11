@@ -1,0 +1,9 @@
+Model,Accuracy
+SVM,0.8545454545454545
+Hist Gradient Boosting,0.8431818181818181
+Extra Trees,0.8363636363636363
+Gradient Boosting,0.825
+KNN,0.8227272727272728
+Random Forest,0.8159090909090909
+Decision Tree,0.7659090909090909
+Logistic Regression,0.525
