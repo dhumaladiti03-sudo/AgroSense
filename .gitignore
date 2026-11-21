@@ -1,0 +1,27 @@
+
+# Python virtual environment
+.venv/
+venv/
+env/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Secrets
+.streamlit/secrets.toml
+.env
+
+# Operating system files
+.DS_Store
+Thumbs.db
+
+# Editor settings
+.vscode/
+# Large soil image datasets (trained model is included)
+data/Orignal-Dataset/
+data/soil_images/

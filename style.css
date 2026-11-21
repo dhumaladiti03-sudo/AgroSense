@@ -1,0 +1,432 @@
+/* ==========================================================
+   AGROSENSE - GLOBAL THEME (readable, high-contrast)
+   Place this file next to app.py as style.css
+========================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Source+Sans+3:wght@400;500;600;700&display=swap');
+
+:root {
+    --primary: #174B35;
+    --primary-hover: #0F3A29;
+    --secondary: #39734D;
+    --accent: #70A77B;
+    --background: #F7FAF7;
+    --surface: #FFFFFF;
+    --sidebar-bg: #EAF2EB;
+    --text: #1F3226;
+    --muted: #4A5F52;
+    --border: #CFE0D2;
+    --tint: #EEF6EF;
+}
+
+/* ==========================================================
+   BASE
+========================================================== */
+
+html, body, .stApp {
+    font-family: 'Source Sans 3', sans-serif;
+}
+
+.stApp {
+    background-color: var(--background);
+    color: var(--text);
+}
+
+.block-container {
+    padding-top: 2.5rem;
+    max-width: 1150px;
+}
+
+/* Body text (scoped so buttons / alerts are not affected) */
+.stMarkdown p,
+.stMarkdown li,
+[data-testid="stWidgetLabel"] p,
+label {
+    color: var(--text);
+    line-height: 1.6;
+}
+
+/* Alerts keep their own semantic colours */
+[data-testid="stAlert"] p,
+[data-testid="stAlert"] li {
+    color: inherit;
+}
+
+/* Headings */
+h1, h2, h3, h4, h5 {
+    font-family: 'Fraunces', serif !important;
+    color: var(--primary) !important;
+    font-weight: 700 !important;
+    letter-spacing: -0.01em;
+}
+
+hr {
+    border-color: var(--border);
+    margin: 1.6rem 0;
+}
+
+/* ==========================================================
+   SIDEBAR
+========================================================== */
+
+[data-testid="stSidebar"] {
+    background-color: var(--sidebar-bg);
+    border-right: 1px solid var(--border);
+}
+
+[data-testid="stSidebar"] .stMarkdown p,
+[data-testid="stSidebar"] .stMarkdown div,
+[data-testid="stSidebar"] h3 {
+    color: var(--primary) !important;
+}
+
+.brand-name {
+    font-family: 'Fraunces', serif;
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--primary);
+    line-height: 1.1;
+}
+
+.brand-tag {
+    font-size: 13px;
+    color: var(--muted);
+    margin-top: 4px;
+}
+
+/* ==========================================================
+   BUTTONS
+   Streamlit puts the label inside <p>, so colour must be set
+   on the <p>/<span>/<div> too. This was the cause of the
+   dark-text-on-dark-button problem.
+========================================================== */
+
+/* Primary = dark green, white text */
+.stButton > button[kind="primary"],
+.stButton > button[data-testid="stBaseButton-primary"] {
+    background-color: var(--primary);
+    border: 1px solid var(--primary);
+    border-radius: 10px;
+    padding: 0.7rem 1rem;
+    font-weight: 700;
+    box-shadow: none;
+    transition: background-color 0.15s ease;
+}
+
+.stButton > button[kind="primary"] *,
+.stButton > button[data-testid="stBaseButton-primary"] * {
+    color: #FFFFFF !important;
+    font-weight: 700;
+}
+
+.stButton > button[kind="primary"]:hover,
+.stButton > button[data-testid="stBaseButton-primary"]:hover {
+    background-color: var(--primary-hover);
+    border-color: var(--primary-hover);
+}
+
+/* Secondary = white, green text */
+.stButton > button[kind="secondary"],
+.stButton > button[data-testid="stBaseButton-secondary"] {
+    background-color: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 0.7rem 1rem;
+    font-weight: 600;
+    box-shadow: none;
+    transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.stButton > button[kind="secondary"] *,
+.stButton > button[data-testid="stBaseButton-secondary"] * {
+    color: var(--primary) !important;
+    font-weight: 600;
+}
+
+.stButton > button[kind="secondary"]:hover,
+.stButton > button[data-testid="stBaseButton-secondary"]:hover {
+    background-color: var(--tint);
+    border-color: var(--secondary);
+}
+
+/* Sidebar navigation: left aligned, active page is dark green */
+[data-testid="stSidebar"] .stButton > button {
+    justify-content: flex-start;
+    text-align: left;
+}
+
+[data-testid="stSidebar"] .stButton > button p {
+    text-align: left;
+    width: 100%;
+}
+
+/* Visible keyboard focus */
+.stButton > button:focus-visible {
+    outline: 3px solid var(--accent);
+    outline-offset: 2px;
+}
+
+/* Disabled */
+.stButton > button:disabled {
+    opacity: 0.55;
+}
+
+/* ==========================================================
+   INPUT FIELDS
+========================================================== */
+
+.stNumberInput input,
+.stTextInput input,
+.stTextArea textarea {
+    background-color: #FFFFFF !important;
+    color: var(--text) !important;
+    border-radius: 8px;
+}
+
+.stNumberInput > div > div,
+.stTextInput > div > div {
+    border: 1px solid #B8CCBC !important;
+    border-radius: 8px !important;
+    background-color: #FFFFFF !important;
+}
+
+.stSelectbox div[data-baseweb="select"] > div {
+    background-color: #FFFFFF;
+    color: var(--text);
+}
+
+/* File uploader */
+[data-testid="stFileUploaderDropzone"] {
+    background-color: var(--surface);
+    border: 1.5px dashed var(--accent);
+    border-radius: 12px;
+}
+
+[data-testid="stFileUploaderDropzone"] span,
+[data-testid="stFileUploaderDropzone"] small,
+[data-testid="stFileUploaderDropzone"] div {
+    color: var(--muted) !important;
+}
+
+/* ==========================================================
+   METRICS / DATAFRAME / CAPTIONS
+========================================================== */
+
+[data-testid="stMetric"] {
+    background-color: var(--tint);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 16px;
+}
+
+[data-testid="stMetricLabel"] p { color: var(--secondary) !important; font-weight: 600; }
+[data-testid="stMetricValue"]   { color: var(--primary) !important; }
+
+[data-testid="stDataFrame"] {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+[data-testid="stAlert"] { border-radius: 10px; }
+
+.stCaption,
+[data-testid="stCaptionContainer"] {
+    color: var(--muted) !important;
+}
+
+/* ==========================================================
+   PAGE ELEMENTS
+========================================================== */
+
+.section-title {
+    font-family: 'Fraunces', serif;
+    color: var(--primary);
+    font-size: 32px;
+    font-weight: 700;
+    margin-bottom: 6px;
+}
+
+.section-description {
+    color: var(--muted);
+    font-size: 16px;
+    max-width: 680px;
+    margin-bottom: 26px;
+}
+
+/* Hero */
+.hero {
+    background: linear-gradient(135deg, #174B35 0%, #24634F 100%);
+    padding: 52px 44px;
+    border-radius: 18px;
+    margin-bottom: 34px;
+}
+
+.hero-label {
+    color: #CDE8D5;
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 14px;
+}
+
+.hero-title {
+    font-family: 'Fraunces', serif;
+    color: #FFFFFF;
+    font-size: 46px;
+    font-weight: 700;
+    line-height: 1.12;
+    margin-bottom: 16px;
+}
+
+.hero-description {
+    color: #EAF5EC;
+    font-size: 18px;
+    line-height: 1.6;
+    max-width: 680px;
+}
+
+/* Feature / step cards */
+.feature-card {
+    background-color: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 24px;
+    min-height: 200px;
+    height: 100%;
+}
+
+.feature-icon { font-size: 30px; margin-bottom: 12px; }
+
+.feature-title {
+    font-family: 'Fraunces', serif;
+    color: var(--primary);
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+
+.feature-description {
+    color: var(--muted);
+    font-size: 15px;
+    line-height: 1.6;
+}
+
+.step-row {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.step-row:last-child { border-bottom: none; }
+
+.step-num {
+    flex: 0 0 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: var(--primary);
+    color: #FFFFFF;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.step-text { color: var(--text); font-size: 16px; line-height: 1.5; }
+.step-text b { color: var(--primary); }
+
+/* Result headings */
+.result-title {
+    font-family: 'Fraunces', serif;
+    color: var(--primary);
+    font-size: 26px;
+    font-weight: 700;
+    margin: 18px 0 14px;
+}
+
+.sub-title {
+    font-family: 'Fraunces', serif;
+    color: var(--primary);
+    font-size: 20px;
+    font-weight: 700;
+    margin: 20px 0 10px;
+}
+
+/* Crop recommendation cards */
+.crop-card {
+    background-color: var(--surface);
+    border: 1px solid var(--border);
+    border-top: 5px solid var(--secondary);
+    border-radius: 14px;
+    padding: 22px;
+    min-height: 180px;
+}
+
+.crop-card.rank-1 { border-top-color: var(--primary); }
+
+.crop-rank {
+    color: var(--muted);
+    font-size: 14px;
+    font-weight: 600;
+    margin: 0 0 8px;
+}
+
+.crop-name {
+    font-family: 'Fraunces', serif;
+    color: var(--primary);
+    font-size: 27px;
+    font-weight: 700;
+    margin: 0 0 18px;
+}
+
+.crop-label {
+    color: var(--muted);
+    font-size: 14px;
+    font-weight: 600;
+    margin: 0 0 4px;
+}
+
+.crop-value {
+    color: var(--primary);
+    font-size: 30px;
+    font-weight: 700;
+    margin: 0 0 16px;
+}
+
+.badge {
+    display: inline-block;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.badge-suitable { background: #DDF1E3; color: #0F5A2E; }
+.badge-context  { background: #FFF0CC; color: #7A4E00; }
+.badge-neutral  { background: #E4EBEE; color: #34484F; }
+
+.crop-ref {
+    color: var(--muted);
+    font-size: 13px;
+    margin: 14px 0 0;
+}
+
+/* Footer */
+.custom-footer {
+    color: var(--muted);
+    text-align: center;
+    font-size: 14px;
+    margin-top: 48px;
+    padding: 20px;
+}
+
+/* ==========================================================
+   MOBILE
+========================================================== */
+
+@media (max-width: 768px) {
+    .hero { padding: 32px 22px; }
+    .hero-title { font-size: 32px; }
+    .section-title { font-size: 26px; }
+}

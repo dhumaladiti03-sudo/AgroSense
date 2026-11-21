@@ -1,0 +1,8 @@
+"soil_type","crop","suitability","source"
+"Alluvial_Soil","rice","Suitable","ICAR"
+"Black_Soil","cotton","Suitable","ICAR"
+"Red_Soil","rice","Context-dependent","ICAR"
+"Yellow_Soil","rice","Context-dependent","ICAR"
+"Laterite_Soil","coffee","Suitable","ICAR"
+"Laterite_Soil","coconut","Context-dependent","ICAR"
+"Mountain_Soil","apple","Context-dependent","ICAR"
