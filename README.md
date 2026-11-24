@@ -109,9 +109,6 @@ AgroSense/
 └── assets/
 ```
 
-## Important Note
-
-The soil moisture sensor currently provides raw sensor readings through the ESP32. Calibration is required to convert these readings into a reliable moisture percentage. The existing soil health model must also be retrained with genuine soil moisture data before moisture can be used as a learned input feature.
 
 ## Future Scope
 
