@@ -1,7 +1,8 @@
-﻿streamlit
+streamlit
 pandas
 numpy
 scikit-learn
 joblib
 Pillow
 tensorflow==2.21.0
+pyserial
