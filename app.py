@@ -1,3 +1,4 @@
+
 import streamlit as st
 import pandas as pd
 import joblib
@@ -8,11 +9,11 @@ from PIL import Image
 from src.nutrient_analysis import analyze_nutrient_deficiency
 from src.soil_image_prediction import predict_soil_type
 from src.combined_crop_prediction import predict_combined_crops
+from src.soil_moisture_sensor import read_soil_moisture
 
 try:
     from src.fertilizer_recommendation import get_fertilizer_recommendation
 except ImportError:
-    # Fallback so the app still runs if the fertilizer module is missing.
     def get_fertilizer_recommendation(crop):
         return None
 
@@ -57,7 +58,9 @@ def load_css(path):
             )
 
 
-soil_health_model, MODEL_FEATURES, MODEL_LOAD_ERROR = load_soil_model(MODEL_PATH)
+soil_health_model, MODEL_FEATURES, MODEL_LOAD_ERROR = load_soil_model(
+    MODEL_PATH
+)
 
 load_css(CSS_PATH)
 
@@ -72,7 +75,10 @@ for key, default in {
     "soil_health": None,
     "soil_image_result": None,
     "soil_image_id": None,
+    "sensor_raw_value": None,
+    "sensor_error": None,
 }.items():
+
     if key not in st.session_state:
         st.session_state[key] = default
 
@@ -104,7 +110,7 @@ def footer():
 
 
 def nav_button(label, page):
-    """Sidebar button. The active page is drawn as a primary (dark green) button."""
+
     is_active = st.session_state.page == page
 
     return st.button(
@@ -132,13 +138,14 @@ def display_crop_recommendations(soil_parameters, soil_type):
 
     st.write(
         "Crop recommendations are generated using your seven "
-        "numerical soil parameters. Soil image classification "
+        "numerical soil model features. Soil image classification "
         "provides additional soil-type suitability information."
     )
 
     try:
 
         with st.spinner("Generating crop recommendations..."):
+
             recommendations = predict_combined_crops(
                 soil_parameters,
                 soil_type
@@ -166,7 +173,6 @@ def display_crop_recommendations(soil_parameters, soil_type):
 
             rank_class = "rank-1" if index == 0 else ""
 
-            # Show suitability only when a mapping exists.
             has_mapping = (
                 suitability != "Not verified"
                 and source != "No mapping available"
@@ -190,7 +196,6 @@ def display_crop_recommendations(soil_parameters, soil_type):
 
             with columns[index]:
 
-                # Crop recommendation card
                 st.markdown(
                     card_html,
                     unsafe_allow_html=True
@@ -286,10 +291,12 @@ with st.sidebar:
     if nav_button("🌾 Crop Recommendation", "Crop Recommendation"):
 
         if st.session_state.soil_health == "Poor":
+
             st.warning(
                 "Crop recommendation is unavailable because "
                 "your soil has been classified as Poor."
             )
+
         else:
             go_to("Crop Recommendation")
 
@@ -312,9 +319,9 @@ if st.session_state.page == "Home":
         '<div class="hero-label">AI-powered agricultural intelligence</div>'
         '<div class="hero-title">Understand your soil.<br>Grow a better future.</div>'
         '<div class="hero-description">'
-        'AgroSense uses machine learning and image classification '
-        'to analyze soil health, identify soil types and recommend '
-        'crops for better agricultural decisions.'
+        'AgroSense uses machine learning, IoT and image classification '
+        'to analyze soil health, monitor soil moisture, identify soil '
+        'types and recommend crops for better agricultural decisions.'
         '</div>'
         '</div>',
         unsafe_allow_html=True
@@ -326,16 +333,34 @@ if st.session_state.page == "Home":
     )
 
     features = [
-        ("🧪", "Soil Health Analysis",
-         "Analyze N, P, K, temperature, humidity, pH and rainfall using machine learning."),
-        ("📸", "Soil Image Recognition",
-         "Identify soil types from uploaded soil images using image classification."),
-        ("🌾", "Crop Recommendation",
-         "Get crop recommendations from soil parameters with additional soil-type suitability information."),
+        (
+            "🧪",
+            "Soil Health Analysis",
+            "Analyze soil nutrients and environmental parameters using machine learning."
+        ),
+        (
+            "📡",
+            "IoT Soil Moisture Monitoring",
+            "Measure soil moisture using a capacitive sensor connected to ESP32."
+        ),
+        (
+            "📸",
+            "Soil Image Recognition",
+            "Identify soil types from uploaded soil images using image classification."
+        ),
+        (
+            "🌾",
+            "Crop Recommendation",
+            "Get crop recommendations with additional soil-type suitability information."
+        ),
     ]
 
-    for column, (icon, title, description) in zip(st.columns(3), features):
+    for column, (icon, title, description) in zip(
+        st.columns(4), features
+    ):
+
         with column:
+
             st.markdown(
                 '<div class="feature-card">'
                 f'<div class="feature-icon">{icon}</div>'
@@ -345,12 +370,28 @@ if st.session_state.page == "Home":
                 unsafe_allow_html=True
             )
 
-    st.markdown('<div class="sub-title">How it works</div>', unsafe_allow_html=True)
+    st.markdown(
+        '<div class="sub-title">How it works</div>',
+        unsafe_allow_html=True
+    )
 
     steps = [
-        ("Enter soil details", "Add your N, P, K, temperature, humidity, pH and rainfall values."),
-        ("Upload a soil photo", "Available when your soil is rated Moderate or Good."),
-        ("Review your crops", "See the top 3 crops with probability and soil suitability."),
+        (
+            "Enter soil details",
+            "Add your N, P, K, temperature, humidity and pH values."
+        ),
+        (
+            "Measure soil moisture",
+            "Connect the ESP32 sensor to obtain a live soil moisture reading."
+        ),
+        (
+            "Upload a soil photo",
+            "Upload an image when your soil is rated Moderate or Good."
+        ),
+        (
+            "Review your crops",
+            "See the top 3 crops with probability and soil suitability."
+        ),
     ]
 
     st.markdown(
@@ -367,12 +408,14 @@ if st.session_state.page == "Home":
     _, center, _ = st.columns([1, 1.2, 1])
 
     with center:
+
         if st.button(
             "Start Soil Assessment →",
             key="home_start",
             use_container_width=True,
             type="primary"
         ):
+
             go_to("Soil Assessment")
 
     footer()
@@ -404,18 +447,30 @@ elif st.session_state.page == "Soil Assessment":
         col1, col2, col3 = st.columns(3)
 
         with col1:
+
             nitrogen = st.number_input(
-                "Nitrogen (N)", min_value=0.0, max_value=140.0, value=50.0
+                "Nitrogen (N)",
+                min_value=0.0,
+                max_value=140.0,
+                value=50.0
             )
 
         with col2:
+
             phosphorus = st.number_input(
-                "Phosphorus (P)", min_value=5.0, max_value=145.0, value=50.0
+                "Phosphorus (P)",
+                min_value=5.0,
+                max_value=145.0,
+                value=50.0
             )
 
         with col3:
+
             potassium = st.number_input(
-                "Potassium (K)", min_value=5.0, max_value=205.0, value=50.0
+                "Potassium (K)",
+                min_value=5.0,
+                max_value=205.0,
+                value=50.0
             )
 
         # ---------------- ENVIRONMENT ----------------
@@ -425,26 +480,66 @@ elif st.session_state.page == "Soil Assessment":
         col4, col5 = st.columns(2)
 
         with col4:
+
             temperature = st.number_input(
                 "Temperature (°C)",
-                min_value=-10.0, max_value=60.0, value=25.0, step=0.5
+                min_value=-10.0,
+                max_value=60.0,
+                value=25.0,
+                step=0.5
             )
 
             humidity = st.number_input(
                 "Humidity (%)",
-                min_value=0.0, max_value=100.0, value=60.0, step=1.0
+                min_value=0.0,
+                max_value=100.0,
+                value=60.0,
+                step=1.0
             )
 
         with col5:
+
             ph = st.number_input(
                 "Soil pH",
-                min_value=0.0, max_value=14.0, value=6.5, step=0.1
+                min_value=0.0,
+                max_value=14.0,
+                value=6.5,
+                step=0.1
             )
 
-            rainfall = st.number_input(
-                "Rainfall (mm)",
-                min_value=0.0, max_value=1000.0, value=100.0, step=1.0
-            )
+            st.markdown("**🌱 Soil Moisture**")
+
+            if st.button(
+                "Read Soil Moisture",
+                key="read_soil_sensor"
+            ):
+
+                raw_value, error = read_soil_moisture()
+
+                st.session_state.sensor_raw_value = raw_value
+                st.session_state.sensor_error = error
+
+            if st.session_state.sensor_raw_value is not None:
+
+                st.metric(
+                    "Soil Moisture (Raw ADC)",
+                    st.session_state.sensor_raw_value
+                )
+
+                st.caption(
+                    "Raw sensor reading from ESP32 (0–4095). "
+                    "A calibrated percentage is not available yet."
+                )
+
+            elif st.session_state.sensor_error:
+
+                st.error(st.session_state.sensor_error)
+
+            else:
+
+                st.info(
+                    "Click to read the soil moisture sensor."
+                )
 
         st.markdown("---")
 
@@ -459,18 +554,37 @@ elif st.session_state.page == "Soil Assessment":
 
             try:
 
+                # Temporary rainfall placeholder:
+                # The existing trained model still requires seven features.
                 input_data = pd.DataFrame(
-                    [[nitrogen, phosphorus, potassium,
-                      temperature, humidity, ph, rainfall]],
-                    columns=["N", "P", "K", "temperature",
-                             "humidity", "ph", "rainfall"]
+                    [[
+                        nitrogen,
+                        phosphorus,
+                        potassium,
+                        temperature,
+                        humidity,
+                        ph,
+                        100.0
+                    ]],
+                    columns=[
+                        "N",
+                        "P",
+                        "K",
+                        "temperature",
+                        "humidity",
+                        "ph",
+                        "rainfall"
+                    ]
                 )
 
                 input_data = input_data[MODEL_FEATURES]
 
                 prediction = soil_health_model.predict(input_data)[0]
 
-                st.session_state.soil_inputs = input_data.iloc[0].to_dict()
+                st.session_state.soil_inputs = (
+                    input_data.iloc[0].to_dict()
+                )
+
                 st.session_state.soil_health = prediction
                 st.session_state.soil_image_result = None
                 st.session_state.soil_image_id = None
@@ -478,7 +592,10 @@ elif st.session_state.page == "Soil Assessment":
                 st.rerun()
 
             except Exception as e:
-                st.error(f"An error occurred during soil prediction: {e}")
+
+                st.error(
+                    f"An error occurred during soil prediction: {e}"
+                )
 
         # ---------------- SAVED RESULT ----------------
 
@@ -486,12 +603,15 @@ elif st.session_state.page == "Soil Assessment":
 
             prediction = st.session_state.soil_health
             saved_inputs = st.session_state.soil_inputs
+
             input_data = pd.DataFrame([saved_inputs])
 
             st.markdown("---")
 
             st.markdown(
-                '<div class="result-title">🌱 Soil Health Assessment Result</div>',
+                '<div class="result-title">'
+                '🌱 Soil Health Assessment Result'
+                '</div>',
                 unsafe_allow_html=True
             )
 
@@ -523,8 +643,13 @@ elif st.session_state.page == "Soil Assessment":
                     else:
                         st.info(f"Status: {item['level']}")
 
-                    st.write(f"**Possible symptoms:** {item['symptoms']}")
-                    st.write(f"**Improvement guidance:** {item['solution']}")
+                    st.write(
+                        f"**Possible symptoms:** {item['symptoms']}"
+                    )
+
+                    st.write(
+                        f"**Improvement guidance:** {item['solution']}"
+                    )
 
                 st.warning(
                     "Crop recommendation and soil image analysis "
@@ -554,20 +679,12 @@ elif st.session_state.page == "Soil Assessment":
                 )
 
             else:
-                st.warning(f"Predicted category: {prediction}")
 
-            # ---- ENTERED PARAMETERS ----
+                st.warning(
+                    f"Predicted category: {prediction}"
+                )
 
-            st.markdown(
-                '<div class="sub-title">Entered soil parameters</div>',
-                unsafe_allow_html=True
-            )
-
-            st.dataframe(
-                input_data,
-                use_container_width=True,
-                hide_index=True
-            )
+          
 
             # ==============================================
             # SOIL IMAGE CLASSIFICATION
@@ -578,7 +695,9 @@ elif st.session_state.page == "Soil Assessment":
                 st.markdown("---")
 
                 st.markdown(
-                    '<div class="result-title">📸 Soil Image Classification</div>',
+                    '<div class="result-title">'
+                    '📸 Soil Image Classification'
+                    '</div>',
                     unsafe_allow_html=True
                 )
 
@@ -603,7 +722,10 @@ elif st.session_state.page == "Soil Assessment":
                         width=400
                     )
 
-                    image_id = (uploaded_image.name, uploaded_image.size)
+                    image_id = (
+                        uploaded_image.name,
+                        uploaded_image.size
+                    )
 
                     if st.button(
                         "Identify Soil Type",
@@ -615,12 +737,17 @@ elif st.session_state.page == "Soil Assessment":
                         try:
 
                             with st.spinner("Analyzing soil image..."):
+
                                 result = predict_soil_type(image)
+
                                 st.session_state.soil_image_result = result
                                 st.session_state.soil_image_id = image_id
 
                         except Exception as e:
-                            st.error(f"Soil image prediction failed: {e}")
+
+                            st.error(
+                                f"Soil image prediction failed: {e}"
+                            )
 
                     # ---- IMAGE PREDICTION RESULT ----
 
@@ -630,12 +757,15 @@ elif st.session_state.page == "Soil Assessment":
                     ):
 
                         result = st.session_state.soil_image_result
+
                         soil_type = result["soil_type"]
                         confidence = result["confidence"]
 
                         st.markdown("---")
 
-                        st.markdown("### 🌱 Soil Classification Result")
+                        st.markdown(
+                            "### 🌱 Soil Classification Result"
+                        )
 
                         st.success(
                             f"Predicted Soil Type: "
@@ -648,37 +778,51 @@ elif st.session_state.page == "Soil Assessment":
                         )
 
                         if confidence < 60:
+
                             st.warning(
                                 "The model has low confidence in this prediction. "
                                 "Try uploading a clearer soil image."
                             )
+
                         elif confidence < 80:
+
                             st.info(
                                 "The prediction has moderate confidence. "
                                 "Please verify it with a physical soil assessment."
                             )
+
                         else:
+
                             st.success(
                                 "The model has high confidence in this prediction. "
                                 "This is still an automated estimate, not a laboratory result."
                             )
 
-                        st.markdown("#### Class-wise Prediction Scores")
+                        st.markdown(
+                            "#### Class-wise Prediction Scores"
+                        )
 
                         prediction_data = pd.DataFrame([
                             {
                                 "Soil Type": name.replace("_", " "),
                                 "Confidence (%)": score
                             }
-                            for name, score in result["all_predictions"].items()
-                        ]).sort_values(by="Confidence (%)", ascending=False)
+                            for name, score
+                            in result["all_predictions"].items()
+                        ]).sort_values(
+                            by="Confidence (%)",
+                            ascending=False
+                        )
 
                         st.bar_chart(
                             prediction_data.set_index("Soil Type"),
                             color="#39734D"
                         )
 
-                        display_crop_recommendations(saved_inputs, soil_type)
+                        display_crop_recommendations(
+                            saved_inputs,
+                            soil_type
+                        )
 
                 else:
 
@@ -702,26 +846,37 @@ elif st.session_state.page == "Crop Recommendation":
 
     if st.session_state.soil_health == "Poor":
 
-        st.error("Crop recommendation is unavailable for Poor soil.")
+        st.error(
+            "Crop recommendation is unavailable for Poor soil."
+        )
 
     elif st.session_state.soil_health in ["Moderate", "Good"]:
 
         if st.session_state.soil_image_result is None:
 
-            st.info("Complete soil image classification first.")
+            st.info(
+                "Complete soil image classification first."
+            )
 
         elif st.session_state.soil_inputs is None:
 
-            st.info("Please complete soil parameter assessment first.")
+            st.info(
+                "Please complete soil parameter assessment first."
+            )
 
         else:
 
-            soil_type = st.session_state.soil_image_result["soil_type"]
+            soil_type = (
+                st.session_state.soil_image_result["soil_type"]
+            )
 
-            st.success("Soil image classification completed.")
+            st.success(
+                "Soil image classification completed."
+            )
 
             st.write(
-                f"**Predicted soil type:** {soil_type.replace('_', ' ')}"
+                f"**Predicted soil type:** "
+                f"{soil_type.replace('_', ' ')}"
             )
 
             display_crop_recommendations(
@@ -731,7 +886,9 @@ elif st.session_state.page == "Crop Recommendation":
 
     else:
 
-        st.info("Please complete Soil Health Assessment first.")
+        st.info(
+            "Please complete Soil Health Assessment first."
+        )
 
 
 # ==========================================================
@@ -748,9 +905,10 @@ elif st.session_state.page == "About":
     st.markdown("### 🌱 Our Project")
 
     st.write(
-        "AgroSense is a machine learning and image classification "
+        "AgroSense is a machine learning, IoT and image classification "
         "based agricultural assistance system designed to analyze "
-        "soil parameters, identify soil types and support crop decisions."
+        "soil parameters, monitor soil moisture, identify soil types "
+        "and support crop decisions."
     )
 
     st.markdown("### 🧠 Technologies Used")
@@ -761,14 +919,17 @@ elif st.session_state.page == "About":
         "- Pandas and NumPy\n"
         "- Scikit-learn\n"
         "- TensorFlow and Keras\n"
-        "- MobileNetV2"
+        "- MobileNetV2\n"
+        "- ESP32\n"
+        "- Capacitive Soil Moisture Sensor"
     )
 
     st.markdown("### 🎯 Project Objective")
 
     st.write(
-        "To provide an accessible prototype for soil health assessment "
-        "and image-based soil classification with crop recommendation support."
+        "To provide an accessible prototype for soil health assessment, "
+        "IoT-based soil moisture monitoring and image-based soil "
+        "classification with crop recommendation support."
     )
 
     footer()
